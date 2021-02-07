@@ -1,0 +1,17 @@
+[
+  {
+    "name": "Up Transactional",
+    "upId": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "ynabId": "yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy"
+  },
+  {
+    "name": "Up Other - Catchall",
+    "upId": "UP_CATCHALL",
+    "ynabId": "yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy"
+  },
+  {
+    "name": "Up My Saver",
+    "upId": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "ynabId": "yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy"
+  }
+]
