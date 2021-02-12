@@ -9,9 +9,14 @@
     "type": "git",
     "url": "https://github.com/daveallie/up-bank-ynab-transformer"
   },
+  "scripts": {
+    "lint": "prettier --check .",
+    "lint:fix": "prettier --write ."
+  },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.71",
     "package": "^1.0.1",
+    "prettier": "2.2.1",
     "serverless": "^2.22.0",
     "serverless-dotenv-plugin": "^3.1.0",
     "serverless-offline": "^6.8.0",

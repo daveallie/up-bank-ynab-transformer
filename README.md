@@ -34,18 +34,20 @@ Note it down.
 ### Setting Up Account Mappings
 
 1. Copy `src/accountMapping.example.json` to `src/accountMapping.json`.
-2. In `accountMapping.json`, leave the transactional and catchall account but create one entry per Up Saver you'd like 
-   to map out. Any savers you don't explicitly map out will have their transactions go into the catchall account. The 
+2. In `accountMapping.json`, leave the transactional and catchall account but create one entry per Up Saver you'd like
+   to map out. Any savers you don't explicitly map out will have their transactions go into the catchall account. The
    names are aesthetic and just help you to connect the accounts, they don't need to match anything else.
 3. Run the following, replacing `<UP_API_KEY>` with your Up API Key.
+
 ```bash
 curl https://api.up.com.au/api/v1/accounts -G -H 'Authorization: Bearer <UP_API_KEY>'
 # Response should contain one transactional account, and as many savers as you have.
 ```
+
 4. For the transactional account and each saver you have in `accountMapping.json`, replace the `upId` with the relevant
    `id` from the curl response.
 5. In YNAB, create a new account for the Up Transaction account, each Saver you have mapped and a catchall account.
-6. For each mapping in `accountMapping.json`, open the YNAB account, your URL should look like 
+6. For each mapping in `accountMapping.json`, open the YNAB account, your URL should look like
    `https://app.youneedabudget.com/zzzzzzzz-zzzz-zzzz-zzzz-zzzzzzzzzzzz/accounts/yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy`.
    Take the `yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy` portion and set the `ynabId` in `accountMapping.json`.
 
@@ -70,6 +72,7 @@ webhook in Up.
 
 1. Run `yarn sls deploy`.
 2. When it succeeds, you'll see:
+
 ```
 Service Information
 service: up-bank-ynab-transformer
@@ -86,8 +89,10 @@ functions:
 layers:
   None
 ```
+
 3. Note down the POST endpoint value (e.g. `https://xxxxxx.execute-api.us-east-1.amazonaws.com/prod/webhook/up`).
 4. Run the following, replacing `<UP_API_KEY>` with your Up API Key, and `<ENDPOINT>` with the POST endpoint.
+
 ```bash
 curl https://api.up.com.au/api/v1/webhooks \
   -XPOST \
@@ -102,6 +107,7 @@ curl https://api.up.com.au/api/v1/webhooks \
     }
   }'
 ```
+
 5. The response will contain a `secretKey`. Set the value of `UP_WEBHOOK_SECRET` in `.env` with this value.
 6. Run `yarn sls deploy` again.
 

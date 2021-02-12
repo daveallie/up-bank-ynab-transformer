@@ -1,5 +1,5 @@
 service: up-bank-ynab-transformer
-frameworkVersion: '2'
+frameworkVersion: "2"
 
 useDotenv: true
 
