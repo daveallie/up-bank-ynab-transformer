@@ -39,6 +39,26 @@ type Money = {
   valueInBaseUnits: number;
 };
 
+type Relationship<T> = {
+  data: {
+    type: T;
+    id: string;
+  };
+  links?: {
+    related: string;
+  };
+};
+
+type NullableRelationship<T> = {
+  data: {
+    type: T;
+    id: string;
+  } | null;
+  links?: {
+    related: string;
+  };
+};
+
 export type Transaction = {
   data: {
     type: "transactions";
@@ -66,33 +86,10 @@ export type Transaction = {
       createdAt: string;
     };
     relationships: {
-      account: {
-        data: {
-          type: "accounts";
-          id: string;
-        };
-        links?: {
-          related: string;
-        };
-      };
-      category: {
-        data: {
-          type: "categories";
-          id: string;
-        } | null;
-        links?: {
-          related: string;
-        };
-      };
-      parentCategory: {
-        data: {
-          type: "categories";
-          id: string;
-        } | null;
-        links?: {
-          related: string;
-        };
-      };
+      account: Relationship<"accounts">;
+      transferAccount: NullableRelationship<"accounts">;
+      category: NullableRelationship<"categories">;
+      parentCategory: NullableRelationship<"categories">;
       tags: {
         data: Array<{
           type: "tags";

@@ -1,4 +1,4 @@
-import { API, SaveTransaction as YnabTransaction } from "ynab";
+import { API, Payee, SaveTransaction as YnabTransaction } from "ynab";
 
 const YNAB_BUDGET_ID = process.env.YNAB_BUDGET_ID || "";
 const YNAB_API_KEY = process.env.YNAB_API_KEY || "";
@@ -26,4 +26,10 @@ export async function updateTransaction(transaction: YnabTransaction) {
 
   const resp = await client.transactions.updateTransaction(YNAB_BUDGET_ID, existingTransaction.id, { transaction });
   console.log(`YNAB update: ${JSON.stringify(resp)}`);
+}
+
+export async function getPayees(): Promise<Array<Payee>> {
+  const payees = (await client.payees.getPayees(YNAB_BUDGET_ID)).data.payees;
+  console.log(`Payees: ${JSON.stringify(payees)}`);
+  return payees;
 }

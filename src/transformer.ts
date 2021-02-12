@@ -22,12 +22,11 @@ export function buildImportId(upTransactionId: string): string {
   return `UP_BANK:${upTransactionId.slice(9)}`;
 }
 
-export function upToYnabTransaction(upTransaction: UpTransaction): YnabTransaction {
-  return {
+export function upToYnabTransaction(upTransaction: UpTransaction, payeeId?: string): YnabTransaction {
+  const baseEvent = {
     account_id: upAccountIdToYnabAccountId(upTransaction.data.relationships.account.data.id),
     amount: upTransaction.data.attributes.amount.valueInBaseUnits * 10,
     date: upTransaction.data.attributes.createdAt.slice(0, 10),
-    payee_name: upTransaction.data.attributes.description,
     cleared:
       upTransaction.data.attributes.status === "HELD"
         ? YnabTransaction.ClearedEnum.Uncleared
@@ -36,4 +35,16 @@ export function upToYnabTransaction(upTransaction: UpTransaction): YnabTransacti
     memo: upTransaction.data.attributes.message,
     approved: true,
   };
+
+  if (payeeId) {
+    return {
+      ...baseEvent,
+      payee_id: payeeId,
+    };
+  } else {
+    return {
+      ...baseEvent,
+      payee_name: upTransaction.data.attributes.description,
+    };
+  }
 }
