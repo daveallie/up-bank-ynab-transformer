@@ -1,4 +1,4 @@
-import { API, Payee, SaveTransaction as YnabTransaction } from "ynab";
+import { API, Payee, SaveTransaction as YnabTransaction, TransactionDetail } from "ynab";
 
 const YNAB_BUDGET_ID = process.env.YNAB_BUDGET_ID || "";
 const YNAB_API_KEY = process.env.YNAB_API_KEY || "";
@@ -8,6 +8,21 @@ const client = new API(YNAB_API_KEY);
 export async function createTransaction(transaction: YnabTransaction) {
   const resp = await client.transactions.createTransaction(YNAB_BUDGET_ID, { transaction });
   console.log(`YNAB save: ${JSON.stringify(resp)}`);
+
+  if (
+    resp.data.transaction?.transfer_transaction_id &&
+    resp.data.transaction.cleared === TransactionDetail.ClearedEnum.Cleared
+  ) {
+    console.log("Clearing other side of transfer");
+    const transactionId = resp.data.transaction.transfer_transaction_id;
+    const transferTransaction = (await client.transactions.getTransactionById(YNAB_BUDGET_ID, transactionId)).data
+      .transaction;
+    transferTransaction.cleared = TransactionDetail.ClearedEnum.Cleared;
+    const transferResp = await client.transactions.updateTransaction(YNAB_BUDGET_ID, transactionId, {
+      transaction: transferTransaction,
+    });
+    console.log(`YNAB save: ${JSON.stringify(transferResp)}`);
+  }
 }
 
 export async function updateTransaction(transaction: YnabTransaction) {
