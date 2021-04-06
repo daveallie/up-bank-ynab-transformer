@@ -11,8 +11,7 @@ export async function upWebhook(event: APIGatewayProxyEvent, context: Context): 
   const body = event.body || "";
   const headers = Object.entries(event.headers).reduce((acc, [key, val]) => ({ ...acc, [key.toLowerCase()]: val }), {});
 
-  console.log(`Body: ${body}`);
-  console.log(`Headers: ${JSON.stringify(headers, null, 2)}`);
+  console.log(`Webhook: ${body}`);
   const expectedSignature = headers["x-up-authenticity-signature"];
   const actualSignature = buildSignature(body);
   if (expectedSignature !== actualSignature) {

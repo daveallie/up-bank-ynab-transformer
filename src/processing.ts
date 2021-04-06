@@ -12,9 +12,16 @@ async function buildYnabCreateTransaction(upTransaction: UpTransaction): Promise
       return null;
     }
 
-    const transferYnabId = upAccountIdToYnabAccountId(upTransaction.data.relationships.transferAccount.data.id);
+    const sourceTransferYnabId = upAccountIdToYnabAccountId(upTransaction.data.relationships.account.data.id);
+    const destTransferYnabId = upAccountIdToYnabAccountId(upTransaction.data.relationships.transferAccount.data.id);
+
+    if (sourceTransferYnabId === destTransferYnabId) {
+      console.log("Attempting to create transfer between same YNAB account. Skipping");
+      return null;
+    }
+
     const payees = await getPayees();
-    const transferPayee = payees.find((p) => !p.deleted && p.transfer_account_id === transferYnabId);
+    const transferPayee = payees.find((p) => !p.deleted && p.transfer_account_id === destTransferYnabId);
 
     if (!transferPayee) {
       throw "Can't find transfer payee!";

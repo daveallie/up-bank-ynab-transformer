@@ -9,4 +9,5 @@ jspm_packages
 .idea
 *.iml
 .env
-src/accountMapping.json
+src/accountMapping.*
+!src/accountMapping.example.json
