@@ -1,4 +1,4 @@
-import { Transaction as UpTransaction } from "./up/types";
+import { TransactionResource as UpTransaction } from "up-bank-api";
 import { SaveTransaction as YnabTransaction } from "ynab/dist/api";
 import ACCOUNT_MAPPING_LIST from "./accountMapping.json";
 
@@ -24,15 +24,15 @@ export function buildImportId(upTransactionId: string): string {
 
 export function upToYnabTransaction(upTransaction: UpTransaction, payeeId?: string): YnabTransaction {
   const baseEvent = {
-    account_id: upAccountIdToYnabAccountId(upTransaction.data.relationships.account.data.id),
-    amount: upTransaction.data.attributes.amount.valueInBaseUnits * 10,
-    date: upTransaction.data.attributes.createdAt.slice(0, 10),
+    account_id: upAccountIdToYnabAccountId(upTransaction.relationships.account.data.id),
+    amount: upTransaction.attributes.amount.valueInBaseUnits * 10,
+    date: upTransaction.attributes.createdAt.slice(0, 10),
     cleared:
-      upTransaction.data.attributes.status === "HELD"
+      upTransaction.attributes.status === "HELD"
         ? YnabTransaction.ClearedEnum.Uncleared
         : YnabTransaction.ClearedEnum.Cleared,
-    import_id: buildImportId(upTransaction.data.id),
-    memo: upTransaction.data.attributes.message,
+    import_id: buildImportId(upTransaction.id),
+    memo: upTransaction.attributes.message,
     approved: true,
   };
 
@@ -44,7 +44,7 @@ export function upToYnabTransaction(upTransaction: UpTransaction, payeeId?: stri
   } else {
     return {
       ...baseEvent,
-      payee_name: upTransaction.data.attributes.description,
+      payee_name: upTransaction.attributes.description,
     };
   }
 }

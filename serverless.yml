@@ -6,7 +6,7 @@ useDotenv: true
 provider:
   name: aws
   runtime: nodejs12.x
-  profile: ynab-deployer
+  profile: ${opt:awsProfile}
   stage: prod
   region: us-east-1
   logRetentionInDays: 90
@@ -17,7 +17,6 @@ provider:
 plugins:
   - serverless-dotenv-plugin
   - serverless-plugin-typescript
-  - serverless-offline
 
 functions:
   upWebhookHandler:

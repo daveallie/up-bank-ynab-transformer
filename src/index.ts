@@ -1,6 +1,6 @@
+import { WebhookEventCallback } from "up-bank-api";
 import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from "aws-lambda";
 import { createHmac } from "crypto";
-import { WebhookEvent } from "./up/types";
 import { transactionCreated, transactionUpdated } from "./processing";
 
 const UP_WEBHOOK_SECRET = process.env.UP_WEBHOOK_SECRET || "";
@@ -25,7 +25,7 @@ export async function upWebhook(event: APIGatewayProxyEvent, context: Context): 
     return { statusCode: 200, body: "" };
   }
 
-  const webhookEventData = (parsedBody as WebhookEvent).data;
+  const webhookEventData = (parsedBody as WebhookEventCallback).data;
 
   if (webhookEventData.attributes.eventType === "TRANSACTION_CREATED") {
     await transactionCreated(webhookEventData.relationships.transaction);

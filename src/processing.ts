@@ -1,19 +1,20 @@
-import { RelationshipTransaction, Transaction as UpTransaction } from "./up/types";
-import { getTransaction } from "./up/api";
+import { UpApi, TransactionResource as UpTransaction, Relationship, RelationshipData } from "up-bank-api";
+import { SaveTransaction as YnabTransaction } from "ynab/dist/api";
 import { createTransaction, getPayees, updateTransaction } from "./ynab/api";
 import { upAccountIdToYnabAccountId, upToYnabTransaction } from "./transformer";
-import { SaveTransaction as YnabTransaction } from "ynab/dist/api";
+
+const up = new UpApi(process.env.UP_API_KEY || "");
 
 async function buildYnabCreateTransaction(upTransaction: UpTransaction): Promise<YnabTransaction | null> {
-  if (upTransaction.data.relationships.transferAccount.data?.id) {
+  if (upTransaction.relationships.transferAccount.data?.id) {
     console.log("Internal transfer");
-    if (upTransaction.data.attributes.amount.valueInBaseUnits < 0) {
+    if (upTransaction.attributes.amount.valueInBaseUnits < 0) {
       console.log("Skipping negative side of internal transfer");
       return null;
     }
 
-    const sourceTransferYnabId = upAccountIdToYnabAccountId(upTransaction.data.relationships.account.data.id);
-    const destTransferYnabId = upAccountIdToYnabAccountId(upTransaction.data.relationships.transferAccount.data.id);
+    const sourceTransferYnabId = upAccountIdToYnabAccountId(upTransaction.relationships.account.data.id);
+    const destTransferYnabId = upAccountIdToYnabAccountId(upTransaction.relationships.transferAccount.data.id);
 
     if (sourceTransferYnabId === destTransferYnabId) {
       console.log("Attempting to create transfer between same YNAB account. Skipping");
@@ -33,11 +34,11 @@ async function buildYnabCreateTransaction(upTransaction: UpTransaction): Promise
   }
 }
 
-export async function transactionCreated(t: RelationshipTransaction | undefined) {
+export async function transactionCreated(t: Relationship<RelationshipData<"transactions">> | undefined) {
   if (!t) return;
 
   console.log("Creating transaction");
-  const upTransaction = await getTransaction(t.data.id);
+  const upTransaction = (await up.transactions.retrieve(t.data.id)).data;
   console.log(`Up Transaction: ${JSON.stringify(upTransaction)}`);
 
   const ynabTransaction = await buildYnabCreateTransaction(upTransaction);
@@ -52,11 +53,11 @@ export async function transactionCreated(t: RelationshipTransaction | undefined)
   });
 }
 
-export async function transactionUpdated(t: RelationshipTransaction | undefined) {
+export async function transactionUpdated(t: Relationship<RelationshipData<"transactions">> | undefined) {
   if (!t) return;
 
   console.log("Updating transaction");
-  const upTransaction = await getTransaction(t.data.id);
+  const upTransaction = (await up.transactions.retrieve(t.data.id)).data;
   console.log(`Up Transaction: ${JSON.stringify(upTransaction)}`);
 
   const ynabTransaction = upToYnabTransaction(upTransaction);
