@@ -1,12 +1,11 @@
 service: up-bank-ynab-transformer
-frameworkVersion: "2"
+frameworkVersion: "3"
 
 useDotenv: true
 
 provider:
   name: aws
-  runtime: nodejs12.x
-  profile: ${opt:awsProfile}
+  runtime: nodejs16.x
   stage: prod
   region: us-east-1
   logRetentionInDays: 90

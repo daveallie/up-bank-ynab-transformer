@@ -14,16 +14,16 @@
     "lint:fix": "prettier --write ."
   },
   "devDependencies": {
-    "@types/aws-lambda": "^8.10.76",
+    "@types/aws-lambda": "^8.10.102",
     "package": "^1.0.1",
-    "prettier": "^2.2.1",
-    "serverless": "^2.39.2",
-    "serverless-dotenv-plugin": "^3.1.0",
-    "serverless-plugin-typescript": "^1.1.9",
-    "typescript": "^4.2.4"
+    "prettier": "^2.7.1",
+    "serverless": "^3.21.0",
+    "serverless-dotenv-plugin": "^4.0.2",
+    "serverless-plugin-typescript": "^2.1.2",
+    "typescript": "^4.7.4"
   },
   "dependencies": {
-    "up-bank-api": "^1.3.0",
-    "ynab": "^1.24.0"
+    "up-bank-api": "^1.5.0",
+    "ynab": "^1.28.0"
   }
 }
