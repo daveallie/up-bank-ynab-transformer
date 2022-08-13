@@ -1,7 +1,7 @@
 import { WebhookEventCallback } from "up-bank-api";
 import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from "aws-lambda";
 import { createHmac } from "crypto";
-import { transactionCreated, transactionUpdated } from "./processing";
+import { transactionCreated, transactionDeleted, transactionUpdated } from "./processing";
 
 const UP_WEBHOOK_SECRET = process.env.UP_WEBHOOK_SECRET || "";
 
@@ -32,7 +32,7 @@ export async function upWebhook(event: APIGatewayProxyEvent, context: Context): 
   } else if (webhookEventData.attributes.eventType === "TRANSACTION_SETTLED") {
     await transactionUpdated(webhookEventData.relationships.transaction);
   } else if (webhookEventData.attributes.eventType === "TRANSACTION_DELETED") {
-    console.log("Transaction deleted");
+    await transactionDeleted(webhookEventData.relationships.transaction);
   } else {
     console.log("Skipping");
   }

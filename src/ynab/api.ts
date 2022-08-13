@@ -43,6 +43,22 @@ export async function updateTransaction(transaction: YnabTransaction) {
   console.log(`YNAB update: ${JSON.stringify(resp)}`);
 }
 
+export async function deleteTransaction(importId: string) {
+  // Transaction to be cancelled should be somewhere in the last 30 days
+  const searchFromDate = new Date(Date.now() - 1000 * 60 * 60 * 24 * 30);
+  const searchFromDateIso = searchFromDate.toISOString().slice(0, 10);
+
+  const transactions = await client.transactions.getTransactions(YNAB_BUDGET_ID, searchFromDateIso);
+  const existingTransaction = transactions.data.transactions.find((t) => t.import_id === importId);
+
+  if (!existingTransaction) {
+    console.log("Could not find existing transaction, ignoring");
+    return;
+  }
+
+  console.log(`Would delete transaction (if YNAB had a delete endpoint): ${JSON.stringify(existingTransaction)}`);
+}
+
 export async function getPayees(): Promise<Array<Payee>> {
   const payees = (await client.payees.getPayees(YNAB_BUDGET_ID)).data.payees;
   console.log(`Payees: ${JSON.stringify(payees)}`);

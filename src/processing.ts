@@ -1,7 +1,7 @@
 import { UpApi, TransactionResource as UpTransaction, Relationship, RelationshipData } from "up-bank-api";
 import { SaveTransaction as YnabTransaction } from "ynab/dist/api";
-import { createTransaction, getPayees, updateTransaction } from "./ynab/api";
-import { upAccountIdToYnabAccountId, upToYnabTransaction } from "./transformer";
+import { createTransaction, deleteTransaction, getPayees, updateTransaction } from "./ynab/api";
+import { buildImportId, upAccountIdToYnabAccountId, upToYnabTransaction } from "./transformer";
 
 const up = new UpApi(process.env.UP_API_KEY || "");
 
@@ -62,4 +62,11 @@ export async function transactionUpdated(t: Relationship<RelationshipData<"trans
 
   const ynabTransaction = upToYnabTransaction(upTransaction);
   await updateTransaction(ynabTransaction);
+}
+
+export async function transactionDeleted(t: Relationship<RelationshipData<"transactions">> | undefined) {
+  if (!t) return;
+
+  console.log("Deleting transaction");
+  await deleteTransaction(buildImportId(t.data.id));
 }
