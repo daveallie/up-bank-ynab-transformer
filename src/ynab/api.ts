@@ -39,7 +39,15 @@ export async function updateTransaction(transaction: YnabTransaction) {
     return;
   }
 
-  const resp = await client.transactions.updateTransaction(YNAB_BUDGET_ID, existingTransaction.id, { transaction });
+  // Only update cleared status to preserve user-edited fields (memo, payee, category, etc.)
+  const resp = await client.transactions.updateTransaction(YNAB_BUDGET_ID, existingTransaction.id, {
+    transaction: {
+      account_id: existingTransaction.account_id,
+      date: existingTransaction.date,
+      amount: existingTransaction.amount,
+      cleared: transaction.cleared,
+    },
+  });
   console.log(`YNAB update: ${JSON.stringify(resp)}`);
 }
 
