@@ -1,7 +1,7 @@
 import { UpApi, TransactionResource as UpTransaction, Relationship, RelationshipData } from "up-bank-api";
 import { SaveTransaction as YnabTransaction } from "ynab/dist/api";
-import { createTransaction, deleteTransaction, getPayees, updateTransaction } from "./ynab/api";
-import { buildImportId, upAccountIdToYnabAccountId, upToYnabTransaction } from "./transformer";
+import { createTransaction, deleteTransaction, getPayees, moveCategoryMoney, updateTransaction } from "./ynab/api";
+import { buildImportId, upAccountIdToMapping, upAccountIdToYnabAccountId, upToYnabTransaction } from "./transformer";
 
 const up = new UpApi(process.env.UP_API_KEY || "");
 
@@ -44,13 +44,46 @@ export async function transactionCreated(t: Relationship<RelationshipData<"trans
   const ynabTransaction = await buildYnabCreateTransaction(upTransaction);
   if (!ynabTransaction) return;
 
-  await createTransaction(ynabTransaction).catch((e) => {
-    if (e && e.error && e.error.name === "conflict") {
-      console.log("Duplicate transaction");
-      return;
-    }
-    throw e;
-  });
+  const created = await createTransaction(ynabTransaction)
+    .then(() => true)
+    .catch((e) => {
+      if (e && e.error && e.error.name === "conflict") {
+        console.log("Duplicate transaction");
+        return false;
+      }
+      throw e;
+    });
+
+  // Only on first create, so webhook retries don't move the budget twice
+  if (created) await mirrorTransferInBudget(upTransaction);
+}
+
+// Moving money out of a pot changes what it's for, so move the matching budget between categories too
+async function mirrorTransferInBudget(upTransaction: UpTransaction) {
+  const sourceUpId = upTransaction.relationships.transferAccount.data?.id;
+  if (!sourceUpId) return;
+
+  // Only transfers a person made: payday splits, Scheduled Transfers and Round Ups have no performing customer
+  // and are already planned in the budget
+  const { performingCustomer } = upTransaction.attributes as { performingCustomer?: { displayName: string } | null };
+  if (!performingCustomer) {
+    console.log("Automatic transfer, not moving budget");
+    return;
+  }
+
+  const source = upAccountIdToMapping(sourceUpId);
+  const dest = upAccountIdToMapping(upTransaction.relationships.account.data.id);
+  if (!source?.categoryId || !dest?.categoryId || source.categoryId === dest.categoryId) {
+    console.log("Transfer doesn't map to a budget move. Skipping");
+    return;
+  }
+
+  const date = upTransaction.attributes.createdAt.slice(0, 10);
+  const milliunits = upTransaction.attributes.amount.valueInBaseUnits * 10;
+  console.log(`Moving ${milliunits} budget from ${source.name} to ${dest.name}`);
+  await moveCategoryMoney(date, source.categoryId, dest.categoryId, milliunits).catch((e) =>
+    console.log(`Budget move failed, do it by hand: ${JSON.stringify(e)}`)
+  );
 }
 
 export async function transactionUpdated(t: Relationship<RelationshipData<"transactions">> | undefined) {

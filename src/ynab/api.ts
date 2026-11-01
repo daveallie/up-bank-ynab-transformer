@@ -67,6 +67,25 @@ export async function deleteTransaction(importId: string) {
   console.log(`Would delete transaction (if YNAB had a delete endpoint): ${JSON.stringify(existingTransaction)}`);
 }
 
+async function adjustBudgeted(month: string, categoryId: string, milliunits: number) {
+  const category = (await client.categories.getMonthCategoryById(YNAB_BUDGET_ID, month, categoryId)).data.category;
+  const resp = await client.categories.updateMonthCategory(YNAB_BUDGET_ID, month, categoryId, {
+    category: { budgeted: category.budgeted + milliunits },
+  });
+  console.log(`YNAB budget update: ${JSON.stringify(resp)}`);
+}
+
+export async function moveCategoryMoney(
+  date: string,
+  fromCategoryId: string,
+  toCategoryId: string,
+  milliunits: number
+) {
+  const month = `${date.slice(0, 7)}-01`;
+  await adjustBudgeted(month, fromCategoryId, -milliunits);
+  await adjustBudgeted(month, toCategoryId, milliunits);
+}
+
 export async function getPayees(): Promise<Array<Payee>> {
   const payees = (await client.payees.getPayees(YNAB_BUDGET_ID)).data.payees;
   console.log(`Payees: ${JSON.stringify(payees)}`);

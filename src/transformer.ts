@@ -6,6 +6,8 @@ type AccountMapping = {
   name: string;
   upId: string;
   ynabId: string;
+  // YNAB category that mirrors this account's money, used to move budget when money moves between accounts
+  categoryId?: string;
 };
 type AccountMappingList = Array<AccountMapping>;
 
@@ -16,6 +18,10 @@ const ACCOUNT_MAPPING: { [upId: string]: AccountMapping } = (ACCOUNT_MAPPING_LIS
 
 export function upAccountIdToYnabAccountId(upAccountId: string): string {
   return (ACCOUNT_MAPPING[upAccountId] || ACCOUNT_MAPPING.UP_CATCHALL).ynabId;
+}
+
+export function upAccountIdToMapping(upAccountId: string): AccountMapping | undefined {
+  return ACCOUNT_MAPPING[upAccountId];
 }
 
 export function buildImportId(upTransactionId: string): string {
