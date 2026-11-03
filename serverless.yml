@@ -5,7 +5,7 @@ useDotenv: true
 
 provider:
   name: aws
-  runtime: nodejs16.x
+  runtime: nodejs24.x
   stage: prod
   region: us-east-1
   logRetentionInDays: 90
